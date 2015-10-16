@@ -63,13 +63,25 @@ int main(int argc, char **argv)
     char buf[CATHACK_BUFSIZE];
     int c;
     FILE *fp;
-    int current_file = 1;
+    int current_file = 0;
     size_t nread;
+
+    while((c = getopt(argc, argv, "f:")) != -1) {
+        switch(c) {
+        case 'f':
+            break;
+        default:
+            usage(stderr);
+            exit(EXIT_FAILURE);
+        }
+    }
+    argc -= optind;
+    argv += optind;
 
     setup();
     atexit(teardown);
 
-    if(argc <= 1) {
+    if(argc < 1) {
         usage(stderr);
         exit(EXIT_FAILURE);
     }
