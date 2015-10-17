@@ -12,6 +12,7 @@ struct termios original_termios;
 
 size_t opt_factor = 4;
 char opt_forever = 0;
+char opt_clear = 0;
 
 static void setup()
 {
@@ -59,6 +60,12 @@ static void fatal(const char *prefix)
     fail(prefix, strerror(errno));
 }
 
+/* Clear the screen */
+static void clear()
+{
+    printf("\e[1;1H\e[2J");
+}
+
 int main(int argc, char **argv)
 {
     char buf[CATHACK_BUFSIZE];
@@ -68,9 +75,12 @@ int main(int argc, char **argv)
     int current_file = 0;
     size_t nread;
 
-    while((c = getopt(argc, argv, "f:l")) != -1) {
+    while((c = getopt(argc, argv, "cf:l")) != -1) {
         long l;
         switch(c) {
+        case 'c':
+            opt_clear = 1;
+            break;
         case 'f':
             endptr = NULL;
             l = strtol(optarg, &endptr, 10);
@@ -113,6 +123,9 @@ int main(int argc, char **argv)
         fatal(argv[current_file]);
     }
 
+    if(opt_clear) {
+        clear();
+    }
     while(1) {
         c = getchar();
         if(c == EOF || c == 4) {
