@@ -11,6 +11,7 @@
 struct termios original_termios;
 
 size_t opt_factor = 4;
+char opt_forever = 0;
 
 static void setup()
 {
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
     int current_file = 0;
     size_t nread;
 
-    while((c = getopt(argc, argv, "f:")) != -1) {
+    while((c = getopt(argc, argv, "f:l")) != -1) {
         long l;
         switch(c) {
         case 'f':
@@ -81,6 +82,9 @@ int main(int argc, char **argv)
                 fail(NULL, "Type factor must be a positive integer");
             }
             opt_factor = (size_t) l;
+            break;
+        case 'l':
+            opt_forever = 1;
             break;
         default:
             usage(stderr);
@@ -120,8 +124,11 @@ int main(int argc, char **argv)
             ungetc(c, stdin);
             fclose(fp);
             current_file++;
-            if(current_file == argc) {
+            if(current_file == argc && !opt_forever) {
                 break;
+            }
+            else if(current_file == argc) {
+                current_file = 0;
             }
             fp = fopen(argv[current_file], "r");
             if(!fp) {
@@ -131,5 +138,6 @@ int main(int argc, char **argv)
         }
         fwrite(buf, sizeof(*buf), nread, stdout);
     }
+    fclose(fp);
     exit(EXIT_SUCCESS);
 }
