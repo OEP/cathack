@@ -61,14 +61,26 @@ static void fatal(const char *prefix)
 int main(int argc, char **argv)
 {
     char buf[CATHACK_BUFSIZE];
+    char *endptr;
     int c;
     FILE *fp;
     int current_file = 0;
     size_t nread;
 
     while((c = getopt(argc, argv, "f:")) != -1) {
+        long l;
         switch(c) {
         case 'f':
+            endptr = NULL;
+            l = strtol(optarg, &endptr, 10);
+            if(endptr != NULL && *endptr != 0) {
+                snprintf(buf, sizeof(buf), "Invalid character: `%c'", *endptr);
+                fail(NULL, buf);
+            }
+            if(l <= 0) {
+                fail(NULL, "Type factor must be a positive integer");
+            }
+            opt_factor = (size_t) l;
             break;
         default:
             usage(stderr);
@@ -87,8 +99,9 @@ int main(int argc, char **argv)
     }
 
     if(opt_factor > CATHACK_BUFSIZE - 1) {
-        fprintf(stderr, "Type factor cannot be >%d\n", CATHACK_BUFSIZE - 1);
-        exit(EXIT_FAILURE);
+        snprintf(buf, sizeof(buf),
+                 "Type factor cannot be >%d", CATHACK_BUFSIZE - 1);
+        fail(NULL, buf);
     }
 
     fp = fopen(argv[current_file], "r");
