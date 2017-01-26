@@ -136,6 +136,7 @@ int main(int argc, char **argv)
         if(nread == 0) {
             ungetc(c, stdin);
             fclose(fp);
+            fp = NULL;
             current_file++;
             if(current_file == argc && !opt_forever) {
                 break;
@@ -151,6 +152,9 @@ int main(int argc, char **argv)
         }
         fwrite(buf, sizeof(*buf), nread, stdout);
     }
-    fclose(fp);
+    if(fp) {
+        fclose(fp);
+        fp = NULL;
+    }
     exit(EXIT_SUCCESS);
 }
