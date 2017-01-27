@@ -32,9 +32,16 @@ static void teardown()
     tcsetattr(STDIN_FILENO, TCSANOW, &original_termios);
 }
 
-static void usage(FILE *fp)
+static void usage(FILE *fp, const char* arg0)
 {
-    fprintf(fp, CATHACK_NAME " [options] file1 [file2...]\n");
+    fprintf(fp,
+        "Usage: " CATHACK_NAME " [options] file [file...]\n"
+        "Options:\n"
+        " -c    Clear the screen before beginning\n"
+        " -f    Print this many characters per keystroke\n"
+        " -l    Keep going until interrupted\n"
+        " -h    Print this message and exit\n"
+    );
 }
 
 /* Prints message to stderr with prefix */
@@ -96,8 +103,11 @@ int main(int argc, char **argv)
         case 'l':
             opt_forever = 1;
             break;
+        case 'h':
+            usage(stdout, argv[0]);
+            exit(EXIT_SUCCESS);
         default:
-            usage(stderr);
+            usage(stderr, argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -108,7 +118,7 @@ int main(int argc, char **argv)
     atexit(teardown);
 
     if(argc < 1) {
-        usage(stderr);
+        usage(stderr, argv[0]);
         exit(EXIT_FAILURE);
     }
 
